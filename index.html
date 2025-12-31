@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase RTDB Ovládanie</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f9; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        .status { font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: bold; }
+        .value { color: #007bff; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; border: none; border-radius: 5px; margin: 5px; transition: 0.3s; }
+        .btn-0 { background-color: #e74c3c; color: white; }
+        .btn-1 { background-color: #2ecc71; color: white; }
+        button:hover { opacity: 0.8; }
+        #loading { font-size: 0.9rem; color: gray; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="loading">Pripájanie k Firebase...</div>
+        <div class="status">
+            Stav: <span id="text-status" class="value">---</span>
+        </div>
+        
+        <button class="btn-0" onclick="updateValue(0)">Vypnúť</button>
+        <button class="btn-1" onclick="updateValue(1)">Otvoriť bránu na diaľku</button>
+    </div>
+
+    <script type="module">
+        // Importy Firebase modulov
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // Tvoja konfigurácia
+        const firebaseConfig = {
+            apiKey: "AIzaSyCygeIPXo6lQsoVbcHKMWjQq-BegEA2N6g",
+            authDomain: "branicka-59904.firebaseapp.com",
+            databaseURL: "https://branicka-59904-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "branicka-59904",
+            storageBucket: "branicka-59904.firebasestorage.app",
+            messagingSenderId: "187074342788",
+            appId: "1:187074342788:web:e38d6d70a27db446d0b7d1"
+        };
+
+        // Inicializácia
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        const statusEl = document.getElementById('text-status');
+        const loadingEl = document.getElementById('loading');
+
+        // 1. Anonymné prihlásenie (kvôli pravidlu auth != null)
+        signInAnonymously(auth)
+            .then(() => {
+                loadingEl.innerText = "Prihlásený (Anonymne) - Načítavam dáta...";
+                
+                // 2. Sledovanie hodnoty v real-time
+                const intRef = ref(db, 'branka/stav');
+                onValue(intRef, (snapshot) => {
+                    const data = snapshot.val();
+                    
+                    if (data === 0) {
+                        statusEl.innerText = "vypnuté";
+                    } else if (data === 1) {
+                        statusEl.innerText = "čakám na otvorenie";
+		    } else if (data === 2) {
+                        statusEl.innerText = "otváram";
+                    } else {
+                        statusEl.innerText = "neviem (" + data + ")";
+                    }
+                    loadingEl.innerText = "Online";
+                });
+            })
+            .catch((error) => {
+                console.error("Chyba prihlásenia:", error);
+                loadingEl.innerText = "Chyba prihlásenia! Skontroluj konzolu.";
+            });
+
+        // 3. Funkcia na zmenu hodnoty
+        window.updateValue = function(newValue) {
+            const intRef = ref(db, 'branka/stav');
+            set(intRef, newValue)
+                .then(() => console.log("Hodnota zmenená na: " + newValue))
+                .catch((error) => alert("Chyba pri zápise: " + error.message));
+        };
+    </script>
+</body>
+</html>
