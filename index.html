@@ -83,19 +83,19 @@
 				    parent.className = "card status-box";
 				
 				    if (data === 0) {
-				        statusEl.innerText = "VYPNUTÉ";
+				        statusEl.innerText = "Čakám na pokyny";
 				        parent.classList.add("state-0");
 				    } else if (data === 1) {
-				        statusEl.innerText = "ČAKÁM NA ODOZVU...";
+				        statusEl.innerText = "Pokyn odoslaný, ČAKÁM NA ODOZVU...";
 				        parent.classList.add("state-1");
 				    } else if (data === 2) {
-				        statusEl.innerText = "PRACUJEM / OTVÁRAM...";
+				        statusEl.innerText = "snažím sa OTVÁRAŤ...";
 				        parent.classList.add("state-2");
 				    } else if (data === 3) {
 				        statusEl.innerText = "ÚSPEŠNE OTVORENÉ";
 				        parent.classList.add("state-3");
 				    } else if (data === 5) {
-				        statusEl.innerText = "CHYBA: NEDOSTUPNÉ";
+				        statusEl.innerText = "CHYBA PRI OTVÁRANÍ, NEOTVORENÉ";
 				        parent.classList.add("state-5");
 				    } else {
 				        statusEl.innerText = "NEZNÁMY STAV (" + data + ")";
