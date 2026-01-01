@@ -15,6 +15,19 @@
         .btn-1 { background-color: #2ecc71; color: white; }
         button:hover { opacity: 0.8; }
         #loading { font-size: 0.9rem; color: gray; }
+		/* Štýly pre stavy */
+		.status-box { padding: 15px; border-radius: 8px; transition: 0.5s; font-weight: bold; }
+		.state-0 { background: #ddd; color: #555; }          /* Vypnuté - Šedá */
+		.state-1 { background: #fff3cd; color: #856404; }    /* Čakám - Žltá */
+		.state-2 { background: #cce5ff; color: #004085; animation: pulse 1.5s infinite; } /* Otváram - Modrá + Animácia */
+		.state-3 { background: #d4edda; color: #155724; }    /* Otvorené - Zelená */
+		.state-5 { background: #f8d7da; color: #721c24; }    /* Chyba - Červená */
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
     </style>
 </head>
 <body>
@@ -62,19 +75,33 @@
                 // 2. Sledovanie hodnoty v real-time
                 const intRef = ref(db, 'branka/stav');
                 onValue(intRef, (snapshot) => {
-                    const data = snapshot.val();
-                    
-                    if (data === 0) {
-                        statusEl.innerText = "vypnuté";
-                    } else if (data === 1) {
-                        statusEl.innerText = "čakám na otvorenie";
-		    } else if (data === 2) {
-                        statusEl.innerText = "otváram";
-                    } else {
-                        statusEl.innerText = "neviem (" + data + ")";
-                    }
-                    loadingEl.innerText = "Online";
-                });
+				    const data = snapshot.val();
+				    const parent = statusEl.parentElement; // Získame obal (card) pre zmenu farby
+				
+				    // Resetujeme triedy
+				    statusEl.className = "value";
+				    parent.className = "card status-box";
+				
+				    if (data === 0) {
+				        statusEl.innerText = "VYPNUTÉ";
+				        parent.classList.add("state-0");
+				    } else if (data === 1) {
+				        statusEl.innerText = "ČAKÁM NA ODOZVU...";
+				        parent.classList.add("state-1");
+				    } else if (data === 2) {
+				        statusEl.innerText = "PRACUJEM / OTVÁRAM...";
+				        parent.classList.add("state-2");
+				    } else if (data === 3) {
+				        statusEl.innerText = "ÚSPEŠNE OTVORENÉ";
+				        parent.classList.add("state-3");
+				    } else if (data === 5) {
+				        statusEl.innerText = "CHYBA: NEDOSTUPNÉ";
+				        parent.classList.add("state-5");
+				    } else {
+				        statusEl.innerText = "NEZNÁMY STAV (" + data + ")";
+				    }
+				    loadingEl.innerText = "Online";
+				});
             })
             .catch((error) => {
                 console.error("Chyba prihlásenia:", error);
